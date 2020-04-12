@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
+
     // 解决AIDL编译时找不到自定义java类.
     // https://www.cnblogs.com/shiwei-bai/p/5207313.html
     sourceSets {
