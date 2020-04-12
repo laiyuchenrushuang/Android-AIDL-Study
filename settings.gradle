@@ -1,0 +1,3 @@
+rootProject.name='Android-AIDL-Study'
+include ':app'
+include ':app-server'
