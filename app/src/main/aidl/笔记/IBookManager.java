@@ -36,28 +36,28 @@ public interface IBookManager extends android.os.IInterface {
       this.attachInterface(this, DESCRIPTOR);
     }
 
-    // 用于返回Binder对象， 是返回Binder本地对象还是Binder代理对象视进程而定。
-    public static IBookManager asInterface(android.os.IBinder obj) {
-      if ((obj==null)) {
-        return null;
+      // 用于返回Binder对象， 是返回Binder本地对象还是Binder代理对象视进程而定。
+      public static IBookManager asInterface(android.os.IBinder obj) {
+          if ((obj==null)) {
+              return null;
+          }
+          // queryLocalInterface() 该方法上面讲过， 通过描述符来查找Binder本地对象。
+          android.os.IInterface iin = obj.queryLocalInterface(DESCRIPTOR);
+          // 如果查找的Binder对象不为空，且是在同一个进程(iin instanceof 笔记.IBookManager)
+          if (((iin!=null)&&(iin instanceof IBookManager))) {
+              // 那么就将查到当前进程中的Binder本地对象直接返回就行了。
+              return ((IBookManager)iin);
+          }
+          // 如果不是同一个进程中的(iin instanceof 笔记.IBookManager)
+          // 那么就返回这个Binder本地对象对应的Binder代理对象。
+          // obj 是BpBinder类型的Binder代理对象,内部包含有Binder引用对象的句柄值.通过该句柄值就可以找到Binder引用对象再找到Binder实体对象,最后找到Binder本地对象.
+          return new Stub.Proxy(obj);
       }
-      // queryLocalInterface() 该方法上面讲过， 通过描述符来查找Binder本地对象。
-      android.os.IInterface iin = obj.queryLocalInterface(DESCRIPTOR);
-      // 如果查找的Binder对象不为空，且是在同一个进程(iin instanceof 笔记.IBookManager)
-      if (((iin!=null)&&(iin instanceof IBookManager))) {
-        // 那么就将查到当前进程中的Binder本地对象直接返回就行了。
-        return ((IBookManager)iin);
+      // 返回当前Binder本地对象。
+      @Override
+      public android.os.IBinder asBinder() {
+          return this;
       }
-      // 如果不是同一个进程中的(iin instanceof 笔记.IBookManager)
-      // 那么就返回这个Binder本地对象对应的Binder代理对象。
-      // obj 是Binder 引用对象.
-      return new Stub.Proxy(obj);
-    }
-    // 返回当前Binder本地对象。
-    @Override
-    public android.os.IBinder asBinder() {
-      return this;
-    }
 
     /**
      * 这个方法是运行在服务端的Binder线程池中，客户端发起跨进程请求，最终会交由此方法处理。
@@ -102,97 +102,91 @@ public interface IBookManager extends android.os.IInterface {
       }
     }
 
-    /**
-     * Binder代理类
-     */
-    private static class Proxy implements IBookManager {
-      // mRemote作用
-      // 向服务端发送客户端传递过来的参数
-      // 挂起当前线程
-      // 接收到服务端线程通知,继续执行客户端线程,并返回到客户端代码区.
-      private android.os.IBinder mRemote;
-
-      Proxy(android.os.IBinder remote) {
-        mRemote = remote;
-      }
-
-      // 返回当前Binder代理对象对应的Binder引用对象,它是在Binder驱动中存在.
-      @Override
-      public android.os.IBinder asBinder() {
-        return mRemote;
-      }
-
-      public String getInterfaceDescriptor() {
-        return DESCRIPTOR;
-      }
-
-      /**
-       * 该方法运行在客户端，当客户端调用该方法时，最终会调用服务端的onTransact().
-       * @return
-       * @throws android.os.RemoteException
-       */
-      @Override
-      public java.util.List<com.yey.ok.Book> getBookList() throws android.os.RemoteException {
-        android.os.Parcel _data = android.os.Parcel.obtain();
-        android.os.Parcel _reply = android.os.Parcel.obtain();
-        java.util.List<com.yey.ok.Book> _result;
-        try {
-          _data.writeInterfaceToken(DESCRIPTOR);
-          // 开始RPC(远程过程调用)，最终调用的就是服务端的onTransact()。
-          // 执行该方法后，当前线程会被挂起，等待服务端进程onTransact()调用完成并返回返回值，然后唤醒客户端线程继续执行。
-          boolean _status = mRemote.transact(Stub.TRANSACTION_getBookList, _data, _reply, 0);
-          // 假如RPC失败，则通过IBookManager类型对象调用当前进程中getBookList()，
-          // getBookList()它是接口方法，需要当前进程自己该方法。
-          if (!_status && getDefaultImpl() != null) {
-            return getDefaultImpl().getBookList();
+      //Binder代理类
+      private static class Proxy implements IBookManager {
+          // mRemote 是BpBinder类型的Binder代理对象,内部包含有Binder引用对象的句柄值.通过该句柄值就可以找到Binder引用对象再找到Binder实体对象,最后找到Binder本地对象.
+          private android.os.IBinder mRemote;
+          Proxy(android.os.IBinder remote) {
+              mRemote = remote;
           }
-          _reply.readException();
-          // RPC成功，从_reply中取出返回值并返回。
-          _result = _reply.createTypedArrayList(com.yey.ok.Book.CREATOR);
-        }
-        finally {
-          _reply.recycle();
-          _data.recycle();
-        }
-        return _result;
-      }
 
-      /**
-       * 该方法运行在客户端，当客户端调用该方法时，最终会调用服务端的onTransact().
-       * @param book
-       * @throws android.os.RemoteException
-       */
-      @Override
-      public void addBook(com.yey.ok.Book book) throws android.os.RemoteException {
-        android.os.Parcel _data = android.os.Parcel.obtain();
-        android.os.Parcel _reply = android.os.Parcel.obtain();
-        try {
-          _data.writeInterfaceToken(DESCRIPTOR);
-          if ((book!=null)) {
-            _data.writeInt(1);
-            book.writeToParcel(_data, 0);
+          // 返回Binder代理对象
+          @Override
+          public android.os.IBinder asBinder() {
+              return mRemote;
           }
-          else {
-            _data.writeInt(0);
+
+          public String getInterfaceDescriptor() {
+              return DESCRIPTOR;
           }
-          // RPC开始，当前线程会被挂起。
-          // RPC完成唤醒线程，继续下面代码执行。
-          boolean _status = mRemote.transact(Stub.TRANSACTION_addBook, _data, _reply, 0);
-          if (!_status && getDefaultImpl() != null) {
-            // 如果RPC失败，尝试调用当前进程中的方法，但是当前进程需要实现该方法。
-            getDefaultImpl().addBook(book);
-            // addBook() 不需要返回值， 所以return就行了。
-            return;
+
+          /**
+           * 该方法运行在客户端，当客户端调用该方法时，最终会调用服务端的onTransact().
+           * @return
+           * @throws android.os.RemoteException
+           */
+          @Override
+          public java.util.List<com.yey.ok.Book> getBookList() throws android.os.RemoteException {
+              android.os.Parcel _data = android.os.Parcel.obtain();
+              android.os.Parcel _reply = android.os.Parcel.obtain();
+              java.util.List<com.yey.ok.Book> _result;
+              try {
+                  _data.writeInterfaceToken(DESCRIPTOR);
+                  // 开始RPC(远程过程调用)，最终调用的就是服务端的onTransact()。
+                  // 执行该方法后，当前线程会被挂起，等待服务端进程onTransact()调用完成并返回返回值，然后唤醒客户端线程继续执行。
+                  boolean _status = mRemote.transact(Stub.TRANSACTION_getBookList, _data, _reply, 0);
+                  // 假如RPC失败，则通过IBookManager类型对象调用当前进程中getBookList()，
+                  // getBookList()它是接口方法，需要当前进程自己该方法。
+                  if (!_status && getDefaultImpl() != null) {
+                      return getDefaultImpl().getBookList();
+                  }
+                  _reply.readException();
+                  // RPC成功，从_reply中取出返回值并返回。
+                  _result = _reply.createTypedArrayList(com.yey.ok.Book.CREATOR);
+              }
+              finally {
+                  _reply.recycle();
+                  _data.recycle();
+              }
+              return _result;
           }
-          _reply.readException();
-        }
-        finally {
-          _reply.recycle();
-          _data.recycle();
-        }
+
+          /**
+           * 该方法运行在客户端，当客户端调用该方法时，最终会调用服务端的onTransact().
+           * @param book
+           * @throws android.os.RemoteException
+           */
+          @Override
+          public void addBook(com.yey.ok.Book book) throws android.os.RemoteException {
+              android.os.Parcel _data = android.os.Parcel.obtain();
+              android.os.Parcel _reply = android.os.Parcel.obtain();
+              try {
+                  _data.writeInterfaceToken(DESCRIPTOR);
+                  if ((book!=null)) {
+                      _data.writeInt(1);
+                      book.writeToParcel(_data, 0);
+                  }
+                  else {
+                      _data.writeInt(0);
+                  }
+                  // RPC开始，当前线程会被挂起。
+                  // RPC完成唤醒线程，继续下面代码执行。
+                  boolean _status = mRemote.transact(Stub.TRANSACTION_addBook, _data, _reply, 0);
+                  if (!_status && getDefaultImpl() != null) {
+                      // 如果RPC失败，尝试调用当前进程中的方法，但是当前进程需要实现该方法。
+                      getDefaultImpl().addBook(book);
+                      // addBook() 不需要返回值， 所以return就行了。
+                      return;
+                  }
+                  _reply.readException();
+              }
+              finally {
+                  _reply.recycle();
+                  _data.recycle();
+              }
+          }
+          public static IBookManager sDefaultImpl;
       }
-      public static IBookManager sDefaultImpl;
-    }
 
     static final int TRANSACTION_getBookList = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
 
